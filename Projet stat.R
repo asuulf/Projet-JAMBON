@@ -20,7 +20,7 @@ dd$Fournisseur <- rep(rep(c('F1', 'F2', 'F3'), each = 30), 2)
 print(head(dd))
 
 
-
+coucou
 
 
 
