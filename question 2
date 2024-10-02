@@ -1,0 +1,45 @@
+valeurs<-read.table('Question2.txt',h=T)
+
+names(valeurs) <- c("Regulation","Fournisseur","Num","teneur_sel") 
+
+#mettre reg et fournisseur en tant que facteur
+valeurs$Regulation <- as.factor(valeurs$Regulation) 
+valeurs$Fournisseur <- as.factor(valeurs$Fournisseur) 
+
+##test de normalité
+lm1 <- lm(teneur_sel ~ Regulation * Fournisseur , data = valeurs) 
+residus <- residuals(lm1) 
+shapiro.test(residus) 
+    #pv <0.05 => accepte H1, residus non homogènes, faire qqplot pour montrer que en brai ca va c'est pas tant éloigné (cf valou)
+
+## q-qplot
+
+
+#A t-on l'égalité des variances? 
+valeurs$group=paste(as.character(valeurs$Regulation),as.character(valeurs$Fournisseur)) 
+valeurs$group=as.factor(valeurs$group) 
+bartlett.test(valeurs$teneur_sel,valeurs$group) 
+
+#Reprise du script ANOVA si toutes les conditions sont remplies 
+# summary(valeurs) 
+
+# Fonction lm identique à celle vu précédemment, on notera un * au lieu d’un + entre Fact1 et Fact2 
+lm1 <- lm(teneur_sel ~ Regulation * Fournisseur , data = valeurs) 
+anova(lm1) 
+#>0.05 donc rejette H1, pas d'interaction et de difference entre les facteurs
+
+#test de student pour verifier 
+RM<-valeurs$teneur_sel[valeurs$Regulation=="RM"]
+RA<-valeurs$teneur_sel[valeurs$Regulation=="RA"]
+
+#verification normalité des valeurs
+shapiro.test(RM)
+shapiro.test(RA)
+  #=> >0.05% donc valeurs suivent une loi normale
+
+#comparer les variances (cf td1)
+var.test(RA,RM)
+  #les variances sont significativement différentes (pv>0.5%)
+
+t.test(RA,RM)
+  #pv>0.5% Il ne semble pas y avoir d'effet du facteur RA ou RM
