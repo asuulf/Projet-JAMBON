@@ -13,6 +13,9 @@ shapiro.test(residus)
     #pv <0.05 => accepte H1, residus non homogènes, faire qqplot pour montrer que en brai ca va c'est pas tant éloigné (cf valou)
 
 ## q-qplot
+qqnorm(valeurs$teneur_sel)
+qqline(valeurs$teneur_sel, col = "red")
+
 
 
 #A t-on l'égalité des variances? 
@@ -43,3 +46,31 @@ var.test(RA,RM)
 
 t.test(RA,RM)
   #pv>0.5% Il ne semble pas y avoir d'effet du facteur RA ou RM
+
+
+
+## t.test entre chaque facteur (ex:F1 RA/ F1 RM) 
+
+F1RA <- valeurs[1:29, "teneur_sel"]
+F2RA <- valeurs[30:59, "teneur_sel"]
+F3RA <- valeurs[60:89, "teneur_sel"]
+F1RM <- valeurs[90:119, "teneur_sel"]
+F2RM <- valeurs[120:149, "teneur_sel"]
+F3RM <- valeurs[150:179, "teneur_sel"]
+
+#normalité F1
+shapiro.test(F1RA)
+shapiro.test(F1RM)
+#homogeneite des variances F1
+var.test(F1RA,F1RM)
+#t test
+t.test(F1RA,F1RM)
+
+#normalité F2
+shapiro.test(F2RA)
+shapiro.test(F2RM)
+#homogeneite des variances F2
+var.test(F2RA,F2RM)
+#t test
+t.test(F2RA,F2RM)
+
