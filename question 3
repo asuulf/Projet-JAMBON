@@ -1,0 +1,28 @@
+#comme il n'y a pas d'effet des facteurs ra rm et F 
+
+#on réalise donc un test t pour comparer une moyenne à une référence
+#H0 : teneur moyenne est conforme au standard (2%) avec risque alpha de se tromper
+#H1 : teneur en sel diff du standard
+#test bilatéral
+
+valeurs = read.table('Question2.txt', header = T)
+names(valeurs) <- c("Regulation","Fournisseur","Num","teneur_sel") 
+valeurs$Regulation <- as.factor(valeurs$Regulation) 
+valeurs$Fournisseur <- as.factor(valeurs$Fournisseur) 
+
+#normalité des valeurs?
+shapiro.test(valeurs$teneur_sel)
+#=> pv <0.05 donc suivent pas la loi normale
+
+#pour etre sur on réalise des gaphiques
+hist(valeurs$teneur_sel, main = "Distribution de la teneur en sel", xlab = "Teneur en sel (g/100g)", breaks = 20)
+
+# QQ-plot pour vérifier la normalité
+qqnorm(valeurs$teneur_sel)
+qqline(valeurs$teneur_sel, col = "red")
+
+# les valeurs semblent tres proches tout de même on suppose qu'elles suivent une loi normale
+
+#t test
+t.test(valeurs$teneur_sel)
+#pv <5% donc la différence est significative on ne peut pas afficher 2%
