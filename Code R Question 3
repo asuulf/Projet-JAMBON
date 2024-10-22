@@ -1,0 +1,70 @@
+library(readxl)
+library(ggplot2)
+library(outliers)
+
+#--------------------------------------------------------------------------------------------
+dfq1 <- read_excel("Jambonexo1.xlsx")
+colnames(dfq1) <- c('Regulation', 'Fournisseur', 'Teneur_Sel')
+View(dfq1)
+
+dfq1$Teneur_Sel <- as.numeric(dfq1$Teneur_Sel)
+
+# Test t unilatéral -> pour plus de puissance dans le test
+t_test_result2 <- t.test(dfq1$Teneur_Sel, mu = 2, alternative = "greater", na.rm = TRUE)
+print(t_test_result2)
+#p-value = 0.51 > 0.05 -> on ne peut pas rejeter l'hypothèse nulle
+#on ne peut pas dire que les vaaleurs sont statistiquement inférieures à 2%
+
+#testons avec 2.25% : 
+t_test_result2.25 <- t.test(dfq1$Teneur_Sel, mu = 2.25, alternative = "less", na.rm = TRUE)
+print(t_test_result2.25)
+#p-value = 2.57e-8 << 0.05 tendance très forte 
+#donc au niveau qualité usine c'est OK mais pas au niveau recommandation.
+
+dfq3 <- read_excel("Jambonexo3.xlsx")
+summary(dfq3)
+head(dfq3)
+#C'est bien importé
+View(dfq3)
+#J'ai enlevé "valeurs concurrentes pour éviter d'avoir not a numerical or logical number
+
+colnames(dfq3) <- c('teneur_sel_concurrents')
+
+moyenne <- mean(dfq3$teneur_sel_concurrents, na.rm = TRUE)
+minimum <- min(dfq3$teneur_sel_concurrents, na.rm = TRUE)
+maximum <- max(dfq3$teneur_sel_concurrents, na.rm = TRUE)
+#True car j'ai supprimé une case
+
+#moyenne : 2,46 > 2,25
+
+#traitons les données :
+# Charger les bibliothèques nécessaires
+
+# Assurer que la colonne est bien en numérique
+dfq3$teneur_sel_concurrents <- as.numeric(dfq3$teneur_sel_concurrents)
+
+# Appliquons le test de Grubbs pour détecter une valeur aberrante
+# Avant cela assurons-nous de la normalité de la distribution des valeurs : 
+# Test de Shapiro-Wilk sur les teneurs en sel
+shapiro_result <- shapiro.test(dfq3$teneur_sel_concurrents)
+
+# Afficher les résultats
+print(shapiro_result)
+
+#Test T unilatéral sur les valeurs de dfq3 :
+t_test_result2 <- t.test(dfq3$teneur_sel_concurrents, mu = 2, alternative = "less", na.rm = TRUE)
+print(t_test_result2)
+#p-value = 0.998 > p-value de dfq1 qui était de 0.51
+t_test_result2.25 <- t.test(dfq3$teneur_sel_concurrents, mu = 2.25, alternative = "less", na.rm = TRUE)
+print(t_test_result2.25)
+#p-value = 0.92 > p-value de dfq3 qui était inférieure à 0.05 !
+
+#Sur-conso de sel dans les produits des concurrents
+
+
+
+
+
+
+  
+
