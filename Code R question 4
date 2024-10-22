@@ -1,0 +1,44 @@
+library(ggplot2)
+library(readxl)
+library(dplyr)
+library(tidyr)
+library(pwr)
+#-------------------------------------------------------------------------------------------
+dfq4a <- read_excel("Jambonexo4a.xlsx")
+
+colnames(dfq4a) <- c('Jambon','teneur_sel_2','teneur_sel_1_5')
+View(dfq4a)
+
+wilcox_test_result <- wilcox.test(dfq4a$teneur_sel_2, dfq4a$teneur_sel_1_5, paired = TRUE, alternative = "two.sided")
+
+print(wilcox_test_result)
+#Même jambon : apparié
+
+#b :
+#anova pour chaque descripteur
+#Effet significatif de la saveur salé sur le type de jambon
+dfq4b <- read_excel("Jambonexo4b.xlsx")
+View(dfq4b)
+colnames(dfq4b) <- c('Jambon', 'score_descripteur_sale', 'score_descripteur_saveur_viande')
+shapiro_test_sale <- shapiro.test(dfq4b$score_descripteur_sale)
+shapiro_test_saveur <- shapiro.test(dfq4b$score_descripteur_saveur_viande)
+print(shapiro_test_saveur)
+print(shapiro_test_sale)
+#Normalité OK
+
+# ANOVA pour tester l'effet du type de jambon sur le descripteur salé
+anova_sale <- aov(score_descripteur_sale ~ Jambon, data = dfq4b)
+
+# Résumé de l'ANOVA pour le descripteur salé
+summary(anova_sale)
+
+# ANOVA pour tester l'effet du type de jambon sur le descripteur saveur viande
+anova_saveur <- aov(score_descripteur_saveur_viande ~ Jambon, data = dfq4b)
+
+# Résumé de l'ANOVA pour le descripteur saveur viande
+summary(anova_saveur)
+#Effet saveur viande et salage sur jambon
+
+
+
+
