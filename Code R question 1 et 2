@@ -1,0 +1,103 @@
+library(ggplot2)
+library(readxl)
+library(dplyr)
+library(tidyr)
+library(pwr)
+#--------------------------------------------------------------------------------------------
+dfq1 <- read_excel("Jambonexo1.xlsx")
+head(dfq1)
+colnames(dfq1) <- c('Regulation', 'Fournisseur', 'Teneur_Sel','Combiné')
+
+#mettre reg et fournisseur en tant que facteur
+dfq1$Regulation <- as.factor(dfq1$Regulation)
+dfq1$Fournisseur <- as.factor(dfq1$Fournisseur)
+#on renomme les colonnes
+
+RM <- dfq1$Teneur_Sel[dfq1$Regulation=="RM"]
+RA <- dfq1$Teneur_Sel[dfq1$Regulation=="RA"]
+
+dfq1$Combiné <- paste0(dfq1$Regulation, dfq1$Fournisseur)
+dfq1$Combiné <- as.factor(dfq1$Combiné)
+
+#on veut différencier les valeurs selon leur régulations
+
+View(dfq1)
+# Installer ggplot2 si ce n'est pas déjà fait
+
+
+# Créer un boxplot pour comparer F1 RA et F1 RM
+# Charger ggplot2
+
+# Créer un boxplot pour comparer F1 RA,s F1 RM, F2 RA, F2 RM, F3 RA, F3 RM
+ggplot(dfq1, aes(x = interaction(Fournisseur, Regulation), y = Teneur_Sel, fill = Regulation)) +
+  geom_boxplot() +
+  labs(title = "Comparaison des écarts types par Fournisse ur et Régulation", x = "Fournisseur et Régulation", y = "Teneur en Sel") +
+  theme_minimal()
+#les ET en RM sont plus grands probalement parce que c'est manuel -> plus de marge d'erreur
+# Exemple de boxplot simple
+boxplot(Teneur_Sel ~ Regulation, data = dfq1, main = "Boxplot Teneur en Sel par Régulation")
+
+  # Regrouper par Fournisseur et Regulation, puis identifier les outliers
+  outliers <- dfq1 %>%
+    group_by(Fournisseur, Regulation) %>%
+    summarise(outliers = list(boxplot.stats(Teneur_Sel)$out)) %>%
+    unnest(cols = c(outliers))
+  
+  # Afficher les valeurs aberrantes détectées
+  print(outliers)
+#On décide d'enlever F2 RM 4.43 car valeur aberrante -> anormale !
+#--------------------------------------------------------------------------------------------
+#On souhaite savoir s'il existe une différence significative entre RA et RM
+
+#Régulation : variable qualitative
+#Tenur Sel : variable quantitative
+  
+#A priori les mesures sont indépendentes
+#On vérifie la normalité des résidus avec le test de Shapiro-Wilk.
+# Test de Shapiro-Wilk sur l'ensemble des données (si vous voulez tester la normalité générale)
+# Test de Shapiro-Wilk sur chaque groupe (RA et RM)
+shapiro_test_RA <- shapiro.test(dfq1$Teneur_Sel[dfq1$Regulation == "RA"])
+shapiro_test_RM <- shapiro.test(dfq1$Teneur_Sel[dfq1$Regulation == "RM"])
+  
+# Afficher les résultats des tests de Shapiro-Wilk pour RA et RM
+print(shapiro_test_RA)
+print(shapiro_test_RM)
+#p-value>0.05 dans les deux cas, les valeurs suivent la loi normale
+
+  
+#Effet des séchoirs sur le teneur en sel :
+anova1 <- aov(Teneur_Sel ~ Regulation, data = dfq1)
+summary(anova1)
+# p-value = 0.125>0.05 pas d'impact statistiquement significatif sur la teneur du sel
+
+anova2 <- aov(Teneur_Sel ~ Fournisseur, data = dfq1)
+summary(anova2)
+
+#On analyse tout de même la dispersion des données pour tester la variabilité des données
+bartlett.test(Teneur_Sel ~ Regulation, data = dfq1)
+#p-value 2.2e-16<<0.05 ce qui signifie que les différences de variances sont très statistiquement significatives et influent fortement sur le test ANOVA
+# On peut alors tenter d'utiliser le Test Anova de Welsh
+oneway.test(Teneur_Sel ~ Regulation, data = dfq1, var.equal = FALSE)
+#p-value>0.05 pas de différence significative entre les groupes
+#On peut aussi tenter le test de Wilcoxon 
+wilcox.test(Teneur_Sel ~ Regulation, data = dfq1)
+#Pas trop utile car shapiro montre normalité et encore une fois p-value > 0.05
+######### Utiliser le log pour refaire une ANOVA ?
+
+#On veut savoir désormais si la taille de l'échantillon est assez important
+TailleEch <- pwr.anova.test(k = 2, f = 0.25, sig.level = 0.05, power = 0.8)
+# k : nombre de groupes, f : Effet recherché ici moyen, sig.level : chance de se tromper, puissance : proba de détecter une diff
+print(TailleEch)
+#La taille recommandée d'échantillon est 64 or on en a que 30 voire 29 dans certains groupes..
+#Mettre dans le rapport mais à nuancer
+
+#Verdict : Statistiquement il n'y a pas d'effet fournisseur. 
+#Mais on peut interroger la variabilité inter-échantillons qui est très grande
+#Cependant même en prenant en compte la variabilité des échantillons on trouve une p-value>0.05
+#On peut également augmenter le nombre de répétition qui ici semble assez faible et aurait dû être 2x supérieure
+#On ne peut pas faire de test de Tuckey puisque l'anova ne montre pas de diff significative
+#--------------------------------------------------------------------------------------------
+
+
+
+
