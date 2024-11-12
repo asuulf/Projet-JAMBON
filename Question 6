@@ -1,0 +1,21 @@
+#question 6
+setwd("C:/Users/anais/Desktop/ENSAIA/2A/s7/stat/recommence")
+library(pgirmess)
+valeursQ6 <- read.table("Question 6.txt",header = TRUE, sep = "\t",dec = ",",fileEncoding = "UTF-8")
+
+summary(valeursQ6)
+
+pairs(valeursQ6)
+
+matrice_correlation <-cor(valeursQ6, method = "pearson")
+
+print(matrice_correlation)
+
+cormat(valeursQ6, method = "pearson", sep = TRUE)
+
+#Teneur en protéines + poids du jambon : Le coef=0.97,  forte corrélation positive entre les 2
+#Teneure en eau + teneur en lipide : co = 0.38, corrélation moyenne, lien entre les 2
+
+#statistiquement (analyse p value): 
+#Teneur en lipides + Teneur en eau : p-value = 0,039, significatif (p < 0,05).
+#Teneur en protéines + Poids du jambon : p-value = 0,000, très significatif
