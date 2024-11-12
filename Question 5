@@ -1,0 +1,67 @@
+
+library(ggplot2)
+
+valeursQ5 <- read.table("Question5!.txt", header = TRUE, sep = "\t",dec = ",")
+names(valeursQ5) <- c("Séchoir", "Humidité", "Num","teneur_sel")
+
+#analyse graphique des données
+par(mfrow = c(1, 1))
+boxplot(teneur_sel ~ interaction(Séchoir, Humidité), data = valeursQ5,col = c("purple", "green"),main = "Comparaison de la Teneur en Sel par Séchoir et Humidité",xlab = "Combinaison Séchoir et Humidité",ylab = "Teneur en Sel",las = 2)
+
+library(ggplot2)
+
+# Créer le graphique en points
+
+par(mfrow = c(4, 2))
+
+plot(valeursQ5$Num[valeursQ5$Séchoir == "pilote" & valeursQ5$Humidité == "H1"], 
+     valeursQ5$teneur_sel[valeursQ5$Séchoir == "pilote" & valeursQ5$Humidité == "H1"], 
+     main = "Condition: pilote - H1", xlab = "Numéros", ylab = "Teneur en sel", 
+    col = "blue")
+
+plot(valeursQ5$Num[valeursQ5$Séchoir == "pilote" & valeursQ5$Humidité == "H2"], 
+     valeursQ5$teneur_sel[valeursQ5$Séchoir == "pilote" & valeursQ5$Humidité == "H2"], 
+     main = "Condition: pilote - H2", xlab = "Numéros", ylab = "Teneur en sel", 
+     pch = 19, col = "blue")
+
+plot(valeursQ5$Num[valeursQ5$Séchoir == "pilote" & valeursQ5$Humidité == "H3"], 
+     valeursQ5$teneur_sel[valeursQ5$Séchoir == "pilote" & valeursQ5$Humidité == "H3"], 
+     main = "Condition: pilote - H3", xlab = "Numéros", ylab = "Teneur en sel", 
+     pch = 19, col = "blue")
+
+plot(valeursQ5$Num[valeursQ5$Séchoir == "pilote" & valeursQ5$Humidité == "H4"], 
+     valeursQ5$teneur_sel[valeursQ5$Séchoir == "pilote" & valeursQ5$Humidité == "H4"], 
+     main = "Condition: pilote - H4", xlab = "Numéros", ylab = "Teneur en sel", 
+     pch = 19, col = "blue")
+
+plot(valeursQ5$Num[valeursQ5$Séchoir == "reference" & valeursQ5$Humidité == "H1"], 
+     valeursQ5$teneur_sel[valeursQ5$Séchoir == "reference" & valeursQ5$Humidité == "H1"], 
+     main = "Condition: reference - H1", xlab = "Numéros", ylab = "Teneur en sel", 
+     pch = 19, col = "blue")
+
+plot(valeursQ5$Num[valeursQ5$Séchoir == "reference" & valeursQ5$Humidité == "H2"], 
+     valeursQ5$teneur_sel[valeursQ5$Séchoir == "reference" & valeursQ5$Humidité == "H2"], 
+     main = "Condition: reference - H2", xlab = "Numéros", ylab = "Teneur en sel", 
+     pch = 19, col = "blue")
+
+plot(valeursQ5$Num[valeursQ5$Séchoir == "reference" & valeursQ5$Humidité == "H3"], 
+     valeursQ5$teneur_sel[valeursQ5$Séchoir == "reference" & valeursQ5$Humidité == "H3"], 
+     main = "Condition: reference - H3", xlab = "Numéros", ylab = "Teneur en sel", 
+     pch = 19, col = "blue")
+
+plot(valeursQ5$Num[valeursQ5$Séchoir == "reference" & valeursQ5$Humidité == "H4"], 
+     valeursQ5$teneur_sel[valeursQ5$Séchoir == "reference" & valeursQ5$Humidité == "H4"], 
+     main = "Condition: reference - H4", xlab = "Numéros", ylab = "Teneur en sel", 
+     pch = 19, col = "blue")
+############# comparaison de plus de 2 échantillons independants, N<30 => test de kruskal et wallis
+
+valeursQ5$Interaction <- interaction(valeursQ5$Séchoir, valeursQ5$Humidité)
+
+kruskal_result <- kruskal.test(teneur_sel ~ Interaction, data = valeursQ5)
+print(kruskal_result)
+
+##il y a une différence significative dans les valeurs de teneur_sel entre les différents groupes
+
+library(pgirmess) 
+kruskalmc(valeursQ5$teneur_sel ~ valeursQ5$Interaction)
+
