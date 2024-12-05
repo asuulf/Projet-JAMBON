@@ -1,0 +1,34 @@
+MOI 
+#question 4b
+setwd("C:/Users/ozouf/OneDrive/Bureau/SAIA/Projet Stat")
+library(pgirmess)
+
+valeursQ4 <- read.table('Question4b.txt',h=F, sep='\t',dec = ",")
+valeursQ4 <- valeursQ4[, 1:3]
+valeursQ4 <- valeursQ4[2:61,]
+names(valeursQ4) <- c("Jambons","score_descripteur_salé","score_descripteur_saveur")
+
+friedman.test(valeursQ4$Jambons,valeursQ4$score_descripteur_saveur,valeursQ4$score_descripteur_salé)
+
+ChatGPT
+# Charger les librairies nécessaires
+library(tidyr)
+library(dplyr)
+
+# Lire les données
+valeursQ4 <- read.table('Question4b.txt', header = FALSE, sep = '\t', dec = ",")
+names(valeursQ4) <- c("Jambons", "score_descripteur_salé", "score_descripteur_viande")
+
+# Préparer les données pour le test Friedman : chaque ligne doit correspondre à un bloc
+# Par exemple, organiser les blocs pour l’analyse avec le descripteur 'salé'
+df_friedman <- valeursQ4 %>%
+  group_by(Jambons) %>%
+  mutate(Block = rep(1:(n()/10), each = 10)) %>%  # Définir les blocs
+  pivot_wider(names_from = Jambons, values_from = score_descripteur_salé) %>%
+  select(-Block)
+
+# Réaliser le test de Friedman pour le descripteur salé
+friedman_result <- friedman.test(as.matrix(df_friedman))
+
+# Afficher le résultat
+print(friedman_result)
