@@ -1,0 +1,52 @@
+#question 5
+
+rm(list=ls()) 
+valeurs <- read.table('Question5!.txt', header = TRUE, sep = "\t", dec = ",")
+names(valeurs) <- c("Sechoir","Humidite","Num","teneur_sel") 
+
+#mettre régulation et fournisseur en facteur
+valeurs$Sechoir <- as.factor(valeurs$Sechoir) 
+valeurs$Humidite <- as.factor(valeurs$Humidite) 
+
+
+# On renomme les colonnes du fichier txt avec des noms génériques qui seront utilisés dans le script 
+names(valeurs) <- c("Fact1","Fact2","Num","Rep") 
+
+# Les données sont indépendantes 
+#Test de la normalité des résidus  
+lm1 <- lm(Rep ~ Fact1 * Fact2 , data = valeurs) 
+residus <- residuals(lm1) 
+shapiro.test(residus) 
+
+qqnorm(residus, main = "QQ Plot des Résidus")
+qqline(residus, col = "red", lwd = 2)
+
+
+#A t-on l'égalité des variances? 
+valeurs$group=paste(as.character(valeurs$Fact1),as.character(valeurs$Fact2)) 
+valeurs$group=as.factor(valeurs$group) 
+bartlett.test(valeurs$Rep,valeurs$group) 
+#Reprise du script ANOVA si toutes les conditions sont remplies 
+summary(valeurs) 
+
+# Fonction lm identique à celle vu précédemment, on notera un * au lieu d’un + entre Fact1 et Fact2 
+lm1 <- lm(Rep ~ Fact1 * Fact2 , data = valeurs) 
+anova(lm1) 
+
+#Calcul des moyennes 
+model.tables(aov(Rep ~ Fact1 * Fact2 , data = valeurs), type = "means") 
+
+# Visualisation des interactions 
+par(mfrow=c(1,2)) 
+attach(valeurs) 
+interaction.plot(Fact1, Fact2, Rep,col = 2:20, lwd=2) 
+interaction.plot (Fact2, Fact1, Rep,col = 2:20, lwd=2) 
+detach(valeurs) 
+
+#Si vous trouvez un effet du facteur, vous pouvez faire un test de Tukey 
+# Il n’y a pas d’interaction, alors je réalise un test de Tukey sur le ou les facteurs qui ont un effet.  
+summary(fm1<-aov(Rep ~ Fact1 * Fact2 , data = valeurs)) 
+TukeyHSD(fm1,"Fact1",alpha=0.05,ordered=TRUE) 
+TukeyHSD(fm1,"Fact2",alpha=0.05,ordered=TRUE) 
+# Il y a une interaction, alors je réalise un test de Tukey uniquement sur l'interaction 
+TukeyHSD(fm1,"Fact1:Fact2",alpha=0.05,ordered=TRUE)
